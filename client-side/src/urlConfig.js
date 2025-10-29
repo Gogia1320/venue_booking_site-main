@@ -1,4 +1,4 @@
-export const api = 'http://localhost:2000/api';
+export const api = 'https://venue-booking-site-backend.onrender.com/api';
 export const getPublicURL = (filename) => {
-    return `http://localhost:2000/public/${filename}`;
+    return `https://venue-booking-site-backend.onrender.com/public/${filename}`;
 }
