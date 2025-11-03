@@ -9,6 +9,7 @@
     "axios": "^0.21.2",
     "bootstrap": "^5.1.0",
     "boring-avatars": "^1.11.2",
+    "nodemon": "^3.1.10",
     "react": "^18.3.1",
     "react-bootstrap": "^1.6.1",
     "react-dom": "^18.3.1",

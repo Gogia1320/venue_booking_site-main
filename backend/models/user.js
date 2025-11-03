@@ -33,7 +33,6 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
         trim: true,
-        unique: true,
         lowercase: true
     },
     hash_password: {
