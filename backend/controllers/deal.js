@@ -2,46 +2,48 @@ const stripe = require('stripe')(process.env.stripe_key);
 const Deal = require('../models/deal');
 
 const checkout = async (req, res) => {
-    const { venueId, eventDate, bill, venueName, venueOwnerId } = req.body;
+  const { venueId, eventDate, bill, venueName, venueOwnerId } = req.body;
 
-    try {
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            mode: 'payment',
-            success_url: `${process.env.GLOBAL_CLIENT_URL}/payment-status?success=true`,
-            cancel_url: `${process.env.GLOBAL_CLIENT_URL}/payment-status?canceled=true`,
-            line_items: [
-                {
-                    price_data: {
-                        currency: 'inr',
-                        product_data: { name: venueName },
-                        unit_amount: bill * 100, // Stripe expects amount in paise
-                    },
-                    quantity: 1,
-                },
-            ],
-        });
+  try {
+    const origin = req.headers.origin || 'http://localhost:3000'; // fallback
 
-        // Save the deal to MongoDB
-        const deal = await new Deal({
-            venueId,
-            eventDate,
-            venueName,
-            venueOwnerId,
-            bill,
-            userId: req.user.id,
-        }).save();
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      success_url: `${origin}/payment-status?success=true`,
+      cancel_url: `${origin}/payment-status?canceled=true`,
+      line_items: [
+        {
+          price_data: {
+            currency: 'inr',
+            product_data: { name: venueName },
+            unit_amount: bill * 100,
+          },
+          quantity: 1,
+        },
+      ],
+    });
 
-        return res.status(201).json({
-            url: session.url,
-            dealId: deal._id,
-        });
+    const deal = await new Deal({
+      venueId,
+      eventDate,
+      venueName,
+      venueOwnerId,
+      bill,
+      userId: req.user.id,
+    }).save();
 
-    } catch (e) {
-        console.error('Checkout error:', e);
-        return res.status(400).json({ msg: e.message || "Payment failed" });
-    }
+    return res.status(201).json({
+      url: session.url,
+      dealId: deal._id,
+    });
+
+  } catch (e) {
+    console.error('Checkout error:', e);
+    return res.status(400).json({ msg: e.message || "Payment failed" });
+  }
 };
+
 
 
 const confirmDeal = async (req, res) => {
